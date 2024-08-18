@@ -17,13 +17,13 @@ class HabitTracker:
         with open(self.filename, 'w') as file:
             json.dump(self.habits, file, indent=4)
 
-    def add_habit(self, habit_name):
+    def add_habit(self, habit_name, category):
         if habit_name.strip() == '':
             print("Habit name cannot be empty.")
             return
         if habit_name not in self.habits:
-            self.habits[habit_name] = {'dates': [], 'streak': 0}
-            print(f"Habit '{habit_name}' added.")
+            self.habits[habit_name] = {'dates': [], 'streak': 0, 'category': category}
+            print(f"Habit '{habit_name}' added under category '{category}'.")
         else:
             print(f"Habit '{habit_name}' already exists.")
         self.save_data()
@@ -62,12 +62,38 @@ class HabitTracker:
             return
         for habit, details in sorted(self.habits.items()):
             print(f"\nHabit: {habit}")
+            print(f"  Category: {details['category']}")
             print(f"  Streak: {details['streak']} days")
             if details['dates']:
                 for date in sorted(details['dates']):
                     print(f"  - {date}")
             else:
                 print("  No records yet.")
+
+    def display_habits_by_category(self, category):
+        print(f"\nHabits under category '{category}':")
+        found = False
+        for habit, details in self.habits.items():
+            if details['category'].lower() == category.lower():
+                print(f"  - {habit} (Streak: {details['streak']} days)")
+                found = True
+        if not found:
+            print(f"No habits found in category '{category}'.")
+
+    def display_longest_streak(self):
+        if not self.habits:
+            print("No habits to display.")
+            return
+        longest_streak = 0
+        longest_habit = None
+        for habit, details in self.habits.items():
+            if details['streak'] > longest_streak:
+                longest_streak = details['streak']
+                longest_habit = habit
+        if longest_habit:
+            print(f"The habit with the longest streak is '{longest_habit}' with {longest_streak} days.")
+        else:
+            print("No streaks found.")
 
     def delete_habit(self, habit_name):
         if habit_name in self.habits:
@@ -123,12 +149,15 @@ def main():
         print("5. Edit Habit")
         print("6. Reset Habit")
         print("7. View Habit Progress")
-        print("8. Exit")
+        print("8. Display Habits by Category")
+        print("9. Display Longest Streak")
+        print("10. Exit")
         choice = input("Choose an option: ")
 
         if choice == '1':
             habit_name = input("Enter habit name: ")
-            tracker.add_habit(habit_name)
+            category = input("Enter habit category: ")
+            tracker.add_habit(habit_name, category)
         elif choice == '2':
             habit_name = input("Enter habit name to mark: ")
             tracker.mark_habit(habit_name)
@@ -148,6 +177,11 @@ def main():
             habit_name = input("Enter habit name to view progress: ")
             tracker.view_habit_progress(habit_name)
         elif choice == '8':
+            category = input("Enter category to display habits: ")
+            tracker.display_habits_by_category(category)
+        elif choice == '9':
+            tracker.display_longest_streak()
+        elif choice == '10':
             break
         else:
             print("Invalid choice. Please select a valid option.")
