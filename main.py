@@ -22,7 +22,9 @@ class HabitTracker:
             print("Habit name cannot be empty.")
             return
         if habit_name not in self.habits:
-            self.habits[habit_name] = {'dates': [], 'streak': 0, 'category': category}
+            self.habits[habit_name] = {
+                'dates': [], 'streak': 0, 'category': category, 'start_date': datetime.now().strftime('%Y-%m-%d')
+            }
             print(f"Habit '{habit_name}' added under category '{category}'.")
         else:
             print(f"Habit '{habit_name}' already exists.")
@@ -56,6 +58,33 @@ class HabitTracker:
                     break
             self.habits[habit_name]['streak'] = streak
 
+    def calculate_completion_percentage(self, habit_name):
+        if habit_name in self.habits:
+            start_date = datetime.strptime(self.habits[habit_name]['start_date'], '%Y-%m-%d')
+            today = datetime.now()
+            total_days = (today - start_date).days + 1
+            completed_days = len(self.habits[habit_name]['dates'])
+            completion_percentage = (completed_days / total_days) * 100
+            print(f"Completion percentage for '{habit_name}': {completion_percentage:.2f}%")
+        else:
+            print(f"Habit '{habit_name}' not found.")
+
+    def reset_habit(self, habit_name):
+        if habit_name in self.habits:
+            self.habits[habit_name]['dates'] = []
+            self.habits[habit_name]['streak'] = 0
+            print(f"Habit '{habit_name}' has been reset.")
+            self.save_data()
+        else:
+            print(f"Habit '{habit_name}' not found.")
+
+    def display_habit_summary(self):
+        total_habits = len(self.habits)
+        total_categories = len(set(h['category'] for h in self.habits.values()))
+        print(f"\nTotal Habits: {total_habits}")
+        print(f"Total Categories: {total_categories}")
+        self.display_longest_streak()
+
     def display_habits(self):
         if not self.habits:
             print("No habits to display.")
@@ -80,6 +109,17 @@ class HabitTracker:
         if not found:
             print(f"No habits found in category '{category}'.")
 
+    def display_habits_by_date_range(self, start_date, end_date):
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        print(f"\nHabits between {start_date.strftime('%Y-%m-%d')} and {end_date.strftime('%Y-%m-%d')}:")
+        for habit, details in self.habits.items():
+            print(f"\nHabit: {habit}")
+            for date in details['dates']:
+                date_obj = datetime.strptime(date, '%Y-%m-%d')
+                if start_date <= date_obj <= end_date:
+                    print(f"  - {date}")
+
     def display_longest_streak(self):
         if not self.habits:
             print("No habits to display.")
@@ -94,6 +134,20 @@ class HabitTracker:
             print(f"The habit with the longest streak is '{longest_habit}' with {longest_streak} days.")
         else:
             print("No streaks found.")
+
+    def backup_data(self, backup_filename):
+        with open(backup_filename, 'w') as file:
+            json.dump(self.habits, file, indent=4)
+        print(f"Data backed up to '{backup_filename}'.")
+
+    def restore_data(self, backup_filename):
+        try:
+            with open(backup_filename, 'r') as file:
+                self.habits = json.load(file)
+            self.save_data()
+            print(f"Data restored from '{backup_filename}'.")
+        except FileNotFoundError:
+            print(f"Backup file '{backup_filename}' not found.")
 
     def delete_habit(self, habit_name):
         if habit_name in self.habits:
@@ -117,27 +171,6 @@ class HabitTracker:
         else:
             print(f"Habit '{old_name}' not found.")
 
-    def reset_habit(self, habit_name):
-        if habit_name in self.habits:
-            self.habits[habit_name]['dates'] = []
-            self.habits[habit_name]['streak'] = 0
-            print(f"Habit '{habit_name}' reset.")
-            self.save_data()
-        else:
-            print(f"Habit '{habit_name}' not found.")
-
-    def view_habit_progress(self, habit_name):
-        if habit_name in self.habits:
-            print(f"\nProgress for '{habit_name}':")
-            if self.habits[habit_name]['dates']:
-                for date in sorted(self.habits[habit_name]['dates']):
-                    print(f"  - {date}")
-                print(f"Current streak: {self.habits[habit_name]['streak']} days")
-            else:
-                print("  No records yet.")
-        else:
-            print(f"Habit '{habit_name}' not found.")
-
 def main():
     tracker = HabitTracker()
     while True:
@@ -151,7 +184,11 @@ def main():
         print("7. View Habit Progress")
         print("8. Display Habits by Category")
         print("9. Display Longest Streak")
-        print("10. Exit")
+        print("10. Backup Data")
+        print("11. Restore Data")
+        print("12. Display Habits by Date Range")
+        print("13. Display Habit Summary")
+        print("14. Exit")
         choice = input("Choose an option: ")
 
         if choice == '1':
@@ -175,13 +212,25 @@ def main():
             tracker.reset_habit(habit_name)
         elif choice == '7':
             habit_name = input("Enter habit name to view progress: ")
-            tracker.view_habit_progress(habit_name)
+            tracker.calculate_completion_percentage(habit_name)
         elif choice == '8':
             category = input("Enter category to display habits: ")
             tracker.display_habits_by_category(category)
         elif choice == '9':
             tracker.display_longest_streak()
         elif choice == '10':
+            backup_filename = input("Enter backup filename: ")
+            tracker.backup_data(backup_filename)
+        elif choice == '11':
+            backup_filename = input("Enter backup filename to restore: ")
+            tracker.restore_data(backup_filename)
+        elif choice == '12':
+            start_date = input("Enter start date (YYYY-MM-DD): ")
+            end_date = input("Enter end date (YYYY-MM-DD): ")
+            tracker.display_habits_by_date_range(start_date, end_date)
+        elif choice == '13':
+            tracker.display_habit_summary()
+        elif choice == '14':
             break
         else:
             print("Invalid choice. Please select a valid option.")
