@@ -18,42 +18,7 @@ A simple habit tracking application built with Python that helps you monitor and
    cd Habit-Tracker
 2. Run the application:
    python main.py
-
-
-Here’s a simple README.md file for your Habit Tracker project:
-
-markdown
-Copy code
-# Habit Tracker
-
-A simple habit tracking application built with Python that helps you monitor and manage your daily habits. This application allows you to add, mark, delete, reset, and track your progress for various habits.
-
-## Features
-
-- Add new habits under specific categories.
-- Mark habits as completed on a daily basis.
-- Track habit streaks and view the longest streak.
-- Display habits by categories and date range.
-- Backup and restore your habit data.
-- View summary of all habits and categories.
-
-## How to Use
-
-1. Clone this repository:
-   ```bash
-   git clone <repository-url>
-Navigate to the project directory:
-
-bash
-Copy code
-cd habit-tracker
-Run the application:
-
-bash
-Copy code
-python habit_tracker.py
-Follow the on-screen menu to manage your habits.
-
+   
 ### Menu Options
 Add Habit: Add a new habit along with its category.
 Mark Habit: Mark a habit as completed for the current day.
